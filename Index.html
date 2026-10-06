@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hikayat Interaktif + Dashboard Guru</title>
+<style>
+  :root{
+    --primary:#6B3E26;
+    --primary-light:#A67B5B;
+    --gold:#D4A94A;
+    --cream:#FBF6EC;
+    --dark:#2B1B12;
+    --accent:#7C4DFF;
+    --success:#2E7D32;
+    --danger:#C62828;
+    --info:#1976D2;
+    --shadow:0 8px 30px rgba(107,62,38,.15);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif;}
+  body{background:linear-gradient(135deg,#FBF6EC 0%,#F2E6D0 100%);color:var(--dark);min-height:100vh;line-height:1.6;}
+
+  /* ===== HEADER ===== */
+  header{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:20px 5%;box-shadow:var(--shadow);position:sticky;top:0;z-index:100;}
+  .header-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  .logo{display:flex;align-items:center;gap:12px;font-size:1.3rem;font-weight:700;}
+  .logo .icon{font-size:2rem;}
+  .header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .student-badge{background:rgba(255,255,255,.2);padding:6px 14px;border-radius:20px;font-size:.85rem;display:flex;align-items:center;gap:8px;}
+  .student-badge strong{color:var(--gold);}
+  .btn-teacher{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);color:#fff;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .3s;}
+  .btn-teacher:hover{background:var(--gold);color:var(--dark);border-color:var(--gold);}
+
+  /* ===== NAVIGATION ===== */
+  nav.tp-nav{max-width:1200px;margin:24px auto;padding:0 5%;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+  .tp-btn{background:#fff;border:2px solid transparent;border-radius:16px;padding:16px;cursor:pointer;text-align:left;transition:all .3s;box-shadow:0 4px 14px rgba(0,0,0,.05);display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;}
+  .tp-btn:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--primary-light);}
+  .tp-btn.active{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border-color:var(--gold);}
+  .tp-btn .tp-label{font-size:.75rem;font-weight:700;opacity:.8;letter-spacing:1px;}
+  .tp-btn .tp-title{font-size:.95rem;font-weight:600;}
+  .tp-btn .jp{position:absolute;top:10px;right:12px;font-size:.7rem;background:var(--gold);color:var(--dark);padding:2px 8px;border-radius:20px;font-weight:700;}
+  .tp-btn.active .jp{background:#fff;color:var(--primary);}
+  .tp-btn .check-mark{position:absolute;bottom:8px;right:12px;font-size:1.2rem;opacity:0;transition:opacity .3s;}
+  .tp-btn.completed .check-mark{opacity:1;}
+
+  /* ===== MAIN ===== */
+  main{max-width:1200px;margin:0 auto;padding:0 5% 60px;}
+  .section{display:none;animation:fadeIn .5s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  .card{background:#fff;border-radius:20px;padding:28px;margin-bottom:24px;box-shadow:var(--shadow);border-left:6px solid var(--gold);}
+  .card h2{color:var(--primary);font-size:1.6rem;margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .card h3{color:var(--primary-light);font-size:1.2rem;margin:18px 0 10px;}
+  .card p{margin-bottom:12px;text-align:justify;}
+  .badge-tp{background:var(--accent);color:#fff;padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700;letter-spacing:1px;}
+  .jp-badge{background:var(--gold);color:var(--dark);padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700;}
+
+  /* ===== VIDEO ===== */
+  .video-frame{position:relative;width:100%;padding-bottom:56.25%;border-radius:16px;overflow:hidden;background:#000;margin:16px 0;box-shadow:var(--shadow);}
+  .video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+  .video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#3E2723,#6B3E26);color:#fff;text-align:center;padding:20px;}
+  .video-placeholder .play-icon{font-size:4rem;margin-bottom:12px;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+
+  /* ===== ACCORDION ===== */
+  .accordion{border:1px solid #E8DCC8;border-radius:12px;overflow:hidden;margin-bottom:10px;}
+  .accordion-header{background:#F8F1E3;padding:14px 18px;cursor:pointer;font-weight:600;color:var(--primary);display:flex;justify-content:space-between;align-items:center;transition:background .3s;}
+  .accordion-header:hover{background:#F0E4CC;}
+  .accordion-header .arrow{transition:transform .3s;}
+  .accordion.open .arrow{transform:rotate(180deg);}
+  .accordion-body{max-height:0;overflow:hidden;transition:max-height .4s ease;background:#fff;}
+  .accordion.open .accordion-body{max-height:1000px;}
+  .accordion-body-inner{padding:16px 20px;}
+
+  /* ===== QUIZ ===== */
+  .quiz{background:linear-gradient(135deg,#FFF8E7,#FBF1DC);border-radius:16px;padding:24px;margin-top:20px;border:2px dashed var(--gold);}
+  .quiz h3{color:var(--primary);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .question{margin-bottom:22px;padding:16px;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05);}
+  .question p{font-weight:600;margin-bottom:12px;color:var(--dark);}
+  .options{display:flex;flex-direction:column;gap:8px;}
+  .option{display:flex;align-items:center;gap:10px;padding:12px 16px;border:2px solid #E8DCC8;border-radius:10px;cursor:pointer;transition:all .25s;background:#fff;}
+  .option:hover{border-color:var(--primary-light);background:#FBF6EC;transform:translateX(4px);}
+  .option input{display:none;}
+  .option.selected{border-color:var(--primary);background:#F5E9D6;}
+  .option.correct{border-color:var(--success);background:#E8F5E9;}
+  .option.wrong{border-color:var(--danger);background:#FFEBEE;}
+  .option .letter{width:28px;height:28px;border-radius:50%;background:var(--cream);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;}
+  .option.correct .letter{background:var(--success);color:#fff;}
+  .option.wrong .letter{background:var(--danger);color:#fff;}
+
+  .quiz-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;}
+  .btn{padding:12px 24px;border:none;border-radius:30px;font-weight:600;cursor:pointer;transition:all .3s;font-size:.95rem;display:inline-flex;align-items:center;gap:8px;}
+  .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(107,62,38,.3);}
+  .btn-gold{background:linear-gradient(135deg,var(--gold),#E8C56A);color:var(--dark);}
+  .btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(212,169,74,.4);}
+  .btn-outline{background:transparent;border:2px solid var(--primary);color:var(--primary);}
+  .btn-outline:hover{background:var(--primary);color:#fff;}
+  .btn-danger{background:linear-gradient(135deg,var(--danger),#E57373);color:#fff;}
+  .btn-danger:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(198,40,40,.3);}
+  .btn-info{background:linear-gradient(135deg,var(--info),#42A5F5);color:#fff;}
+  .btn-info:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(25,118,210,.3);}
+
+  .quiz-result{margin-top:16px;padding:18px;border-radius:12px;text-align:center;font-weight:600;font-size:1.1rem;display:none;}
+  .quiz-result.show{display:block;animation:fadeIn .5s ease;}
+  .quiz-result.pass{background:#E8F5E9;color:var(--success);border:2px solid var(--success);}
+  .quiz-result.fail{background:#FFEBEE;color:var(--danger);border:2px solid var(--danger);}
+
+  /* ===== TABLE ===== */
+  .compare-table{width:100%;border-collapse:collapse;margin:16px 0;border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  .compare-table th{background:var(--primary);color:#fff;padding:14px;text-align:left;font-size:.9rem;}
+  .compare-table td{padding:12px 14px;border-bottom:1px solid #F0E4CC;background:#fff;font-size:.9rem;vertical-align:top;}
+  .compare-table tr:nth-child(even) td{background:#FBF6EC;}
+  .compare-table tr:last-child td{border-bottom:none;}
+
+  /* ===== TIMELINE ===== */
+  .timeline{position:relative;padding-left:36px;margin:20px 0;}
+  .timeline::before{content:'';position:absolute;left:12px;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),var(--primary));border-radius:3px;}
+  .timeline-item{position:relative;margin-bottom:20px;padding:14px 18px;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05);}
+  .timeline-item::before{content:'';position:absolute;left:-30px;top:20px;width:16px;height:16px;border-radius:50%;background:var(--gold);border:3px solid #fff;box-shadow:0 0 0 2px var(--primary-light);}
+  .timeline-item h4{color:var(--primary);margin-bottom:6px;font-size:1rem;}
+
+  /* ===== TEXT HIKAYAT ===== */
+  .text-hikayat{background:#FFFDF7;border:2px solid var(--gold);border-radius:12px;padding:20px;margin:16px 0;font-family:Georgia,serif;line-height:1.9;position:relative;}
+  .text-hikayat::before{content:'📜';position:absolute;top:-16px;left:20px;background:#fff;padding:0 8px;font-size:1.5rem;}
+
+  /* ===== REFLECTION ===== */
+  .reflection textarea{width:100%;min-height:120px;padding:14px;border:2px solid #E8DCC8;border-radius:12px;font-family:inherit;font-size:.95rem;resize:vertical;background:#FFFDF7;}
+  .reflection textarea:focus{outline:none;border-color:var(--primary);}
+
+  /* ===== MODAL ===== */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(43,27,18,.7);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+  .modal-overlay.show{display:flex;animation:fadeIn .3s ease;}
+  .modal{background:#fff;border-radius:20px;max-width:600px;width:100%;padding:32px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:popIn .4s ease;max-height:90vh;overflow-y:auto;}
+  @keyframes popIn{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .modal .emoji{font-size:4rem;margin-bottom:12px;}
+  .modal h2{color:var(--primary);margin-bottom:12px;}
+  .modal p{margin-bottom:20px;color:#555;}
+  .modal input{width:100%;padding:14px;border:2px solid #E8DCC8;border-radius:12px;font-size:1rem;margin-bottom:16px;text-align:center;}
+  .modal input:focus{outline:none;border-color:var(--primary);}
+
+  /* ===== TEACHER DASHBOARD ===== */
+  .dashboard{display:none;position:fixed;inset:0;background:#F5F0E8;z-index:500;overflow-y:auto;}
+  .dashboard.show{display:block;}
+  .dash-header{background:linear-gradient(135deg,#1A237E,#3949AB);color:#fff;padding:24px 5%;position:sticky;top:0;z-index:10;box-shadow:0 4px 20px rgba(0,0,0,.2);}
+  .dash-header-inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  .dash-title{font-size:1.4rem;font-weight:700;display:flex;align-items:center;gap:12px;}
+  .dash-title .icon{font-size:2rem;}
+  .dash-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .dash-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);color:#fff;padding:10px 18px;border-radius:20px;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .3s;display:inline-flex;align-items:center;gap:6px;}
+  .dash-btn:hover{background:#fff;color:#1A237E;}
+  .dash-btn.close{background:var(--danger);border-color:var(--danger);}
+  .dash-btn.close:hover{background:#B71C1C;color:#fff;}
+
+  .dash-body{max-width:1400px;margin:24px auto;padding:0 5% 60px;}
+
+  /* ===== STATS CARDS ===== */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+  .stat-card{background:#fff;border-radius:16px;padding:22px;box-shadow:0 4px 20px rgba(0,0,0,.08);border-left:5px solid var(--info);position:relative;overflow:hidden;}
+  .stat-card.gold{border-left-color:var(--gold);}
+  .stat-card.green{border-left-color:var(--success);}
+  .stat-card.purple{border-left-color:var(--accent);}
+  .stat-card .stat-icon{position:absolute;right:16px;top:16px;font-size:2.2rem;opacity:.15;}
+  .stat-card .stat-label{font-size:.8rem;color:#888;text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px;}
+  .stat-card .stat-value{font-size:2.2rem;font-weight:800;color:var(--dark);line-height:1;}
+  .stat-card .stat-sub{font-size:.85rem;color:#666;margin-top:6px;}
+
+  /* ===== STUDENT TABLE ===== */
+  .students-panel{background:#fff;border-radius:16px;padding:24px;box-shadow:0 4px 20px rgba(0,0,0,.08);margin-bottom:24px;}
+  .panel-title{font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;}
+  .search-input{padding:10px 16px;border:2px solid #E0E0E0;border-radius:30px;font-size:.9rem;min-width:240px;}
+  .search-input:focus{outline:none;border-color:var(--info);}
+
+  .student-table{width:100%;border-collapse:collapse;font-size:.9rem;}
+  .student-table th{background:#F5F5F5;padding:12px;text-align:left;font-weight:700;color:#555;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;}
+  .student-table td{padding:12px;border-bottom:1px solid #F0F0F0;}
+  .student-table tr:hover td{background:#F9F5FF;}
+  .student-table tr:last-child td{border-bottom:none;}
+
+  .score-chip{display:inline-block;padding:4px 12px;border-radius:20px;font-weight:700;font-size:.8rem;min-width:50px;text-align:center;}
+  .score-chip.excellent{background:#E8F5E9;color:var(--success);}
+  .score-chip.good{background:#E3F2FD;color:var(--info);}
+  .score-chip.fair{background:#FFF8E1;color:#F57C00;}
+  .score-chip.poor{background:#FFEBEE;color:var(--danger);}
+  .score-chip.empty{background:#EEEEEE;color:#999;}
+
+  .action-btn{padding:6px 12px;border:none;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s;}
+  .action-btn.view{background:#E3F2FD;color:var(--info);}
+  .action-btn.view:hover{background:var(--info);color:#fff;}
+  .action-btn.del{background:#FFEBEE;color:var(--danger);margin-left:4px;}
+  .action-btn.del:hover{background:var(--danger);color:#fff;}
+
+  /* ===== BAR CHART ===== */
+  .chart-container{display:flex;align-items:flex-end;gap:8px;height:200px;padding:20px 0;border-bottom:2px solid #E0E0E0;margin-bottom:8px;}
+  .chart-bar{flex:1;background:linear-gradient(180deg,var(--info),#64B5F6);border-radius:8px 8px 0 0;position:relative;min-height:4px;transition:all .5s ease;cursor:pointer;}
+  .chart-bar:hover{filter:brightness(1.1);}
+  .chart-bar .bar-value{position:absolute;top:-24px;left:50%;transform:translateX(-50%);font-size:.75rem;font-weight:700;color:var(--dark);}
+  .chart-bar .bar-label{position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);font-size:.75rem;color:#666;white-space:nowrap;font-weight:600;}
+  .chart-bars-wrapper{padding-bottom:32px;}
+
+  /* ===== STUDENT DETAIL MODAL ===== */
+  .detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #EEE;}
+  .detail-row:last-child{border-bottom:none;}
+  .detail-row .label{color:#666;font-size:.9rem;}
+  .detail-row .value{font-weight:700;color:var(--dark);}
+  .reflection-box{background:#FFFDF7;border:2px solid var(--gold);border-radius:12px;padding:14px;margin-top:12px;font-style:italic;font-size:.9rem;max-height:150px;overflow-y:auto;text-align:left;}
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state{text-align:center;padding:60px 20px;color:#999;}
+  .empty-state .emoji{font-size:4rem;margin-bottom:16px;opacity:.5;}
+
+  /* ===== FOOTER ===== */
+  footer{background:var(--dark);color:#fff;text-align:center;padding:24px;font-size:.85rem;}
+  footer p{opacity:.8;}
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width:640px){
+    .card{padding:20px;}
+    .card h2{font-size:1.3rem;}
+    .logo{font-size:1.1rem;}
+    .logo .icon{font-size:1.5rem;}
+    .stat-card .stat-value{font-size:1.6rem;}
+    .student-table{font-size:.8rem;}
+    .student-table th,.student-table td{padding:8px 6px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= STUDENT LOGIN MODAL ================= -->
+<div class="modal-overlay show" id="loginModal">
+  <div class="modal">
+    <div class="emoji">👋</div>
+    <h2>Selamat Datang!</h2>
+    <p>Masukkan namamu untuk memulai pembelajaran.</p>
+    <input type="text" id="studentNameInput" placeholder="Contoh: Andi Pratama" maxlength="40" autocomplete="off">
+    <input type="text" id="studentClassInput" placeholder="Kelas (contoh: XI RPL 1)" maxlength="20" autocomplete="off" style="margin-bottom:20px;">
+    <button class="btn btn-primary" onclick="loginStudent()" style="width:100%;justify-content:center;">🚀 Mulai Belajar</button>
+  </div>
+</div>
+
+<!-- ================= HEADER ================= -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="icon">📜</span>
+      <div>
+        <div>Hikayat Interaktif</div>
+        <div style="font-size:.75rem;opacity:.85;font-weight:400;">Bahasa Indonesia — Kelas XI SMK</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="student-badge" id="studentBadge" style="display:none;">
+        👤 <strong id="badgeName">-</strong>
+      </div>
+      <button class="btn-teacher" onclick="openTeacherLogin()">👨‍🏫 Dashboard Guru</button>
+    </div>
+  </div>
+</header>
+
+<!-- ================= NAVIGATION ================= -->
+<nav class="tp-nav">
+  <button class="tp-btn active" data-target="tp1">
+    <span class="tp-label">A-11 (TP 1)</span>
+    <span class="tp-title">Nilai Moral &amp; Unsur Pembangun</span>
+    <span class="jp">3 JP</span>
+    <span class="check-mark">✅</span>
+  </button>
+  <button class="tp-btn" data-target="tp2">
+    <span class="tp-label">A-12 (TP 2)</span>
+    <span class="tp-title">Interpretasi &amp; Perbandingan</span>
+    <span class="jp">3 JP</span>
+    <span class="check-mark">✅</span>
+  </button>
+  <button class="tp-btn" data-target="tp3">
+    <span class="tp-label">A-13 (TP 3)</span>
+    <span class="tp-title">Menulis Cerpen Adaptasi</span>
+    <span class="jp">4 JP</span>
+    <span class="check-mark">✅</span>
+  </button>
+  <button class="tp-btn" data-target="tp4">
+    <span class="tp-label">A-14 (TP 4)</span>
+    <span class="tp-title">Presentasi Monolog/Teater</span>
+    <span class="jp">4 JP</span>
+    <span class="check-mark">✅</span>
+  </button>
+</nav>
+
+<!-- ================= MAIN ================= -->
+<main>
+
+<!-- TP 1 -->
+<section class="section active" id="tp1">
+  <div class="card">
+    <h2>📖 Pertemuan 1 — Mengevaluasi Nilai &amp; Unsur Hikayat</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <span class="badge-tp">A-11 (TP 1)</span>
+      <span class="jp-badge">3 JP</span>
+      <span class="badge-tp" style="background:var(--primary-light)">Menyimak • Membaca • Memirsa</span>
+    </div>
+    <p><strong>Tujuan:</strong> Murid mampu mengevaluasi nilai-nilai moral, pesan, serta unsur pembangun (intrinsik dan ekstrinsik) dari teks sastra klasik (Hikayat) berbentuk aural secara kritis.</p>
+
+    <div class="video-frame">
+      <div class="video-placeholder">
+        <div class="play-icon">▶️</div>
+        <div style="font-size:1.2rem;font-weight:600;">Video Aural: "Hikayat Bayan Budiman"</div>
+        <div style="font-size:.9rem;opacity:.8;margin-top:6px;">Durasi 8:45 — Narasi + Sound Design</div>
+      </div>
+    </div>
+
+    <h3>🔍 Pengertian Hikayat</h3>
+    <p><strong>Hikayat</strong> adalah karya sastra klasik Melayu berbentuk prosa yang berisi cerita tentang kehidupan raja, dewa, pahlawan, atau orang sakti. Hikayat berkembang pada masa sastra lama dan umumnya <em>anonim</em> (tidak diketahui pengarangnya).</p>
+
+    <h3>🧩 Unsur Pembangun Hikayat</h3>
+    <div class="accordion">
+      <div class="accordion-header">1️⃣ Unsur Intrinsik <span class="arrow">▼</span></div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <ul style="padding-left:20px;">
+          <li><strong>Tema:</strong> Ide pokok cerita (kepahlawanan, kesetiaan, keajaiban).</li>
+          <li><strong>Tokoh &amp; Penokohan:</strong> Raja, putri, pahlawan, dewa, hewan sakti.</li>
+          <li><strong>Alur:</strong> Maju, mundur, atau campuran (sering memakai "maka", "syahdan", "alkisah").</li>
+          <li><strong>Latar:</strong> Istana, hutan, negeri antah-berantah.</li>
+          <li><strong>Sudut Pandang:</strong> Umumnya orang ketiga serba tahu.</li>
+          <li><strong>Gaya Bahasa:</strong> Kaya majas, klise sastra Melayu klasik.</li>
+          <li><strong>Amanat:</strong> Pesan moral kepada pembaca.</li>
+        </ul>
+      </div></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">2️⃣ Unsur Ekstrinsik <span class="arrow">▼</span></div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <ul style="padding-left:20px;">
+          <li><strong>Latar belakang masyarakat:</strong> Kerajaan Melayu, feodalisme.</li>
+          <li><strong>Latar belakang penulis:</strong> Umumnya anonim.</li>
+          <li><strong>Nilai budaya:</strong> Adat istiadat Melayu, kesetiaan, kehormatan.</li>
+          <li><strong>Nilai religius:</strong> Pengaruh Hindu-Buddha dan Islam.</li>
+        </ul>
+      </div></div>
+    </div>
+
+    <h3>💎 Nilai-Nilai Moral dalam Hikayat</h3>
+    <div class="timeline">
+      <div class="timeline-item"><h4>Nilai Kesetiaan</h4><p>Tokoh setia kepada raja, keluarga, atau janji.</p></div>
+      <div class="timeline-item"><h4>Nilai Kepahlawanan</h4><p>Keberanian membela kebenaran dan keadilan.</p></div>
+      <div class="timeline-item"><h4>Nilai Religius</h4><p>Ketaatan kepada Tuhan dan menjauhi larangan.</p></div>
+      <div class="timeline-item"><h4>Nilai Sosial</h4><p>Gotong royong dan kepedulian terhadap sesama.</p></div>
+      <div class="timeline-item"><h4>Nilai Pendidikan</h4><p>Pentingnya menuntut ilmu dan kebijaksanaan.</p></div>
+    </div>
+
+    <div class="text-hikayat">
+      <strong>📜 Cuplikan Hikayat Bayan Budiman:</strong><br><br>
+      <em>"Syahdan, maka adalah seorang saudagar yang amat kaya di negeri Ajam. Ia mempunyai seorang isteri yang sangat setia dan cantik parasnya. Adapun akan tuan puteri itu, tiadalah ia beranak, melainkan seekor burung bayan yang amat pandai berkata-kata."</em>
+    </div>
+
+    <div class="quiz" data-quiz="tp1">
+      <h3>🎯 Kuis Interaktif — Pertemuan 1</h3>
+      <form>
+        <div class="question" data-correct="b">
+          <p>1. Kata "syahdan" dan "maka" dalam cuplikan hikayat di atas berfungsi sebagai...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q1" value="a"><span class="letter">A</span>Penanda latar waktu</label>
+            <label class="option"><input type="radio" name="q1" value="b"><span class="letter">B</span>Penanda alur sastra klasik</label>
+            <label class="option"><input type="radio" name="q1" value="c"><span class="letter">C</span>Nama tokoh utama</label>
+            <label class="option"><input type="radio" name="q1" value="d"><span class="letter">D</span>Judul cerita</label>
+          </div>
+        </div>
+        <div class="question" data-correct="c">
+          <p>2. Berikut ini yang <strong>bukan</strong> termasuk unsur intrinsik hikayat adalah...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q2" value="a"><span class="letter">A</span>Tema dan amanat</label>
+            <label class="option"><input type="radio" name="q2" value="b"><span class="letter">B</span>Tokoh dan alur</label>
+            <label class="option"><input type="radio" name="q2" value="c"><span class="letter">C</span>Latar belakang penulis</label>
+            <label class="option"><input type="radio" name="q2" value="d"><span class="letter">D</span>Latar tempat dan waktu</label>
+          </div>
+        </div>
+        <div class="question" data-correct="a">
+          <p>3. Nilai moral yang tampak pada tokoh istri dalam cuplikan di atas adalah...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q3" value="a"><span class="letter">A</span>Kesetiaan terhadap suami</label>
+            <label class="option"><input type="radio" name="q3" value="b"><span class="letter">B</span>Keserakahan</label>
+            <label class="option"><input type="radio" name="q3" value="c"><span class="letter">C</span>Keangkuhan</label>
+            <label class="option"><input type="radio" name="q3" value="d"><span class="letter">D</span>Kepalsuan</label>
+          </div>
+        </div>
+        <div class="question" data-correct="d">
+          <p>4. Kata "anonim" pada hikayat berarti...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q4" value="a"><span class="letter">A</span>Ditulis oleh raja</label>
+            <label class="option"><input type="radio" name="q4" value="b"><span class="letter">B</span>Ditulis dalam bahasa Arab</label>
+            <label class="option"><input type="radio" name="q4" value="c"><span class="letter">C</span>Ditulis berulang-ulang</label>
+            <label class="option"><input type="radio" name="q4" value="d"><span class="letter">D</span>Tidak diketahui pengarangnya</label>
+          </div>
+        </div>
+      </form>
+      <div class="quiz-actions">
+        <button class="btn btn-primary" onclick="checkQuiz('tp1')">✅ Periksa Jawaban</button>
+        <button class="btn btn-outline" onclick="resetQuiz('tp1')">🔄 Ulangi</button>
+      </div>
+      <div class="quiz-result" id="result-tp1"></div>
+    </div>
+  </div>
+</section>
+
+<!-- TP 2 -->
+<section class="section" id="tp2">
+  <div class="card">
+    <h2>🔍 Pertemuan 2 — Interpretasi &amp; Perbandingan Hikayat vs Cerpen</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <span class="badge-tp">A-12 (TP 2)</span>
+      <span class="jp-badge">3 JP</span>
+      <span class="badge-tp" style="background:var(--primary-light)">Menyimak • Membaca • Memirsa</span>
+    </div>
+    <p><strong>Tujuan:</strong> Murid mampu menginterpretasi makna tersurat dan tersirat serta mengungkapkan perasaan simpati/empati dari teks hikayat visual/audiovisual, kemudian membandingkan karakteristik dan nilai di dalamnya dengan teks sastra modern (cerpen).</p>
+
+    <div class="video-frame">
+      <div class="video-placeholder">
+        <div class="play-icon">🎬</div>
+        <div style="font-size:1.2rem;font-weight:600;">Video Visual: Adaptasi Hikayat</div>
+        <div style="font-size:.9rem;opacity:.8;margin-top:6px;">Dramatisasi Audiovisual — 10:20</div>
+      </div>
+    </div>
+
+    <h3>📌 Makna Tersurat vs Tersirat</h3>
+    <div class="accordion">
+      <div class="accordion-header">🔤 Makna Tersurat (Eksplisit) <span class="arrow">▼</span></div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <p>Makna yang <strong>tertulis langsung</strong> dalam teks dan dapat dipahami tanpa penafsiran mendalam.</p>
+        <p><em>Contoh:</em> "Sang raja memerintahkan patih untuk mencari putri yang hilang."</p>
+      </div></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">🕵️ Makna Tersirat (Implisit) <span class="arrow">▼</span></div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <p>Makna yang <strong>tersembunyi</strong> di balik kalimat, perlu penafsiran, sering berupa pesan moral atau kritik sosial.</p>
+        <p><em>Contoh:</em> "Burung bayan itu terbang jauh meninggalkan sang putri."<br>→ <em>Tersirat: kesetiaan bisa diuji oleh keadaan.</em></p>
+      </div></div>
+    </div>
+
+    <h3>💗 Simpati vs Empati</h3>
+    <table class="compare-table">
+      <tr><th>Simpati</th><th>Empati</th></tr>
+      <tr><td>Merasa <strong>iba</strong> atau turut prihatin terhadap tokoh.</td><td>Merasa <strong>ikut merasakan</strong> apa yang dialami tokoh.</td></tr>
+      <tr><td><em>"Kasihan sekali putri itu."</em></td><td><em>"Aku ikut merasakan kesedihan putri itu."</em></td></tr>
+    </table>
+
+    <h3>⚖️ Perbandingan Hikayat vs Cerpen</h3>
+    <table class="compare-table">
+      <tr><th>Aspek</th><th>Hikayat</th><th>Cerpen</th></tr>
+      <tr><td>Bahasa</td><td>Melayu klasik ("maka", "syahdan")</td><td>Bahasa Indonesia modern</td></tr>
+      <tr><td>Tokoh</td><td>Raja, dewa, pahlawan sakti</td><td>Manusia biasa, realistis</td></tr>
+      <tr><td>Alur</td><td>Sering berulang, berpola</td><td>Fokus, satu peristiwa</td></tr>
+      <tr><td>Sifat</td><td>Fantastis, ajaib</td><td>Realistis</td></tr>
+      <tr><td>Pengarang</td><td>Anonim</td><td>Diketahui namanya</td></tr>
+      <tr><td>Nilai</td><td>Kesetiaan, kepahlawanan, religius</td><td>Nilai modern: sosial, moral, psikologis</td></tr>
+    </table>
+
+    <div class="quiz" data-quiz="tp2">
+      <h3>🎯 Kuis Interaktif — Pertemuan 2</h3>
+      <form>
+        <div class="question" data-correct="b">
+          <p>1. Kalimat "Burung bayan itu terbang jauh meninggalkan sang putri" mengandung makna...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="t2q1" value="a"><span class="letter">A</span>Tersurat — burung terbang</label>
+            <label class="option"><input type="radio" name="t2q1" value="b"><span class="letter">B</span>Tersirat — kesetiaan diuji keadaan</label>
+            <label class="option"><input type="radio" name="t2q1" value="c"><span class="letter">C</span>Tersurat dan tersirat sama</label>
+            <label class="option"><input type="radio" name="t2q1" value="d"><span class="letter">D</span>Tidak bermakna</label>
+          </div>
+        </div>
+        <div class="question" data-correct="c">
+          <p>2. Perbedaan utama bahasa hikayat dengan cerpen adalah...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="t2q2" value="a"><span class="letter">A</span>Hikayat berima, cerpen tidak</label>
+            <label class="option"><input type="radio" name="t2q2" value="b"><span class="letter">B</span>Hikayat bersajak, cerpen prosa</label>
+            <label class="option"><input type="radio" name="t2q2" value="c"><span class="letter">C</span>Hikayat memakai Melayu klasik, cerpen Bahasa Indonesia modern</label>
+            <label class="option"><input type="radio" name="t2q2" value="d"><span class="letter">D</span>Tidak ada perbedaan</label>
+          </div>
+        </div>
+        <div class="question" data-correct="a">
+          <p>3. Sikap "aku ikut merasakan kesedihan tokoh" disebut...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="t2q3" value="a"><span class="letter">A</span>Empati</label>
+            <label class="option"><input type="radio" name="t2q3" value="b"><span class="letter">B</span>Simpati</label>
+            <label class="option"><input type="radio" name="t2q3" value="c"><span class="letter">C</span>Apati</label>
+            <label class="option"><input type="radio" name="t2q3" value="d"><span class="letter">D</span>Antipati</label>
+          </div>
+        </div>
+      </form>
+      <div class="quiz-actions">
+        <button class="btn btn-primary" onclick="checkQuiz('tp2')">✅ Periksa Jawaban</button>
+        <button class="btn btn-outline" onclick="resetQuiz('tp2')">🔄 Ulangi</button>
+      </div>
+      <div class="quiz-result" id="result-tp2"></div>
+    </div>
+  </div>
+</section>
+
+<!-- TP 3 -->
+<section class="section" id="tp3">
+  <div class="card">
+    <h2>✍️ Pertemuan 3 — Menulis Cerpen Adaptasi Hikayat</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <span class="badge-tp">A-13 (TP 3)</span>
+      <span class="jp-badge">4 JP</span>
+      <span class="badge-tp" style="background:var(--primary-light)">Menulis</span>
+    </div>
+    <p><strong>Tujuan:</strong> Murid mampu menulis sebuah cerpen atau naskah adaptasi yang idenya ditransformasikan dari nilai-nilai teks hikayat secara logis dan kreatif, serta memublikasikannya ke media cetak atau media digital.</p>
+
+    <div class="video-frame">
+      <div class="video-placeholder">
+        <div class="play-icon">📝</div>
+        <div style="font-size:1.2rem;font-weight:600;">Tutorial: Dari Hikayat ke Cerpen Modern</div>
+        <div style="font-size:.9rem;opacity:.8;margin-top:6px;">Langkah demi Langkah — 12:00</div>
+      </div>
+    </div>
+
+    <h3>🔄 Alur Transformasi Hikayat → Cerpen</h3>
+    <div class="timeline">
+      <div class="timeline-item"><h4>Langkah 1 — Membaca &amp; Memahami Hikayat</h4><p>Pahami tema, tokoh, konflik, dan nilai moralnya.</p></div>
+      <div class="timeline-item"><h4>Langkah 2 — Memilih Nilai Inti</h4><p>Pilih satu nilai utama yang ingin diadaptasi.</p></div>
+      <div class="timeline-item"><h4>Langkah 3 — Membuat Sinopsis Modern</h4><p>Ubah latar, tokoh, dan konteks menjadi modern.</p></div>
+      <div class="timeline-item"><h4>Langkah 4 — Menyusun Struktur Cerpen</h4><p>Abstrak → Orientasi → Komplikasi → Evaluasi → Resolusi → Koda.</p></div>
+      <div class="timeline-item"><h4>Langkah 5 — Menulis Draf Pertama</h4><p>Gunakan bahasa modern, kaidah PUEBI, dan majas.</p></div>
+      <div class="timeline-item"><h4>Langkah 6 — Merevisi &amp; Menyunting</h4><p>Periksa ejaan, tanda baca, konsistensi tokoh.</p></div>
+      <div class="timeline-item"><h4>Langkah 7 — Publikasi</h4><p>Unggah ke blog, media sosial, atau mading sekolah.</p></div>
+    </div>
+
+    <h3>📋 Rubrik Penilaian Cerpen Adaptasi</h3>
+    <table class="compare-table">
+      <tr><th>Aspek</th><th>Skor Maks</th><th>Indikator</th></tr>
+      <tr><td>Kesesuaian nilai hikayat</td><td>25</td><td>Nilai inti hikayat terlihat jelas.</td></tr>
+      <tr><td>Struktur cerpen</td><td>25</td><td>Memuat abstrak s.d. koda.</td></tr>
+      <tr><td>Kaidah kebahasaan</td><td>20</td><td>PUEBI, majas, diksi tepat.</td></tr>
+      <tr><td>Kreativitas</td><td>20</td><td>Ide segar, latar modern.</td></tr>
+      <tr><td>Kerapian &amp; publikasi</td><td>10</td><td>Rapi, dipublikasikan.</td></tr>
+    </table>
+
+    <h3>📝 Tugas Praktik</h3>
+    <div class="reflection">
+      <p style="margin-bottom:8px;"><strong>Instruksi:</strong> Tulis cerpen adaptasi hikayatmu (min. 500 kata). Simpan drafnya di sini untuk dikumpulkan ke guru.</p>
+      <textarea id="cerpenText" placeholder="Tulis cerpen adaptasimu di sini..." style="min-height:200px;"></textarea>
+      <div class="quiz-actions">
+        <button class="btn btn-gold" onclick="saveCerpen()">💾 Simpan Cerpen</button>
+      </div>
+      <div class="quiz-result" id="cerpenResult"></div>
+    </div>
+
+    <div class="quiz" data-quiz="tp3">
+      <h3>🎯 Kuis Interaktif — Pertemuan 3</h3>
+      <form>
+        <div class="question" data-correct="c">
+          <p>1. Langkah pertama dalam mengadaptasi hikayat menjadi cerpen adalah...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="t3q1" value="a"><span class="letter">A</span>Langsung menulis</label>
+            <label class="option"><input type="radio" name="t3q1" value="b"><span class="letter">B</span>Mencari gambar</label>
+            <label class="option"><input type="radio" name="t3q1" value="c"><span class="letter">C</span>Membaca &amp; memahami isi hikayat</label>
+            <label class="option"><input type="radio" name="t3q1" value="d"><span class="letter">D</span>Menyalin mentah-mentah</label>
+          </div>
+        </div>
+        <div class="question" data-correct="a">
+          <p>2. Jika hikayat berlatarbelakang istana, adaptasi modern bisa memakai latar...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="t3q2" value="a"><span class="letter">A</span>Sekolah atau kantor</label>
+            <label class="option"><input type="radio" name="t3q2" value="b"><span class="letter">B</span>Tetap istana</label>
+            <label class="option"><input type="radio" name="t3q2" value="c"><span class="letter">C</span>Planet Mars</label>
+            <label class="option"><input type="radio" name="t3q2" value="d"><span class="letter">D</span>Tidak perlu latar</label>
+          </div>
+        </div>
+        <div class="question" data-correct="d">
+          <p>3. Urutan struktur cerpen yang benar adalah...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="t3q3" value="a"><span class="letter">A</span>Orientasi → Komplikasi → Koda</label>
+            <label class="option"><input type="radio" name="t3q3" value="b"><span class="letter">B</span>Komplikasi → Resolusi → Abstrak</label>
+            <label class="option"><input type="radio" name="t3q3" value="c"><span class="letter">C</span>Koda → Orientasi → Evaluasi</label>
+            <label class="option"><input type="radio" name="t3q3" value="d"><span class="letter">D</span>Abstrak → Orientasi → Komplikasi → Evaluasi → Resolusi → Koda</label>
+          </div>
+        </div>
+      </form>
+      <div class="quiz-actions">
+        <button class="btn btn-primary" onclick="checkQuiz('tp3')">✅ Periksa Jawaban</button>
+        <button class="btn btn-outline" onclick="resetQuiz('tp3')">🔄 Ulangi</button>
+      </div>
+      <div class="quiz-result" id="result-tp3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- TP 4 -->
+<section class="section" id="tp4">
+  <div class="card">
+    <h2>🎭 Pertemuan 4 — Presentasi Monolog / Teater Mini</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <span class="badge-tp">A-14 (TP 4)</span>
+      <span class="jp-badge">4 JP</span>
+      <span class="badge-tp" style="background:var(--primary-light)">Berbicara • Mempresentasikan</span>
+    </div>
+    <p><strong>Tujuan:</strong> Murid mampu mempresentasikan naskah/cerpen hasil adaptasi hikayat dalam bentuk monolog atau dialog (teater mini) secara sistematis dan kreatif, serta merefleksikan nilai luhurnya.</p>
+
+    <div class="video-frame">
+      <div class="video-placeholder">
+        <div class="play-icon">🎭</div>
+        <div style="font-size:1.2rem;font-weight:600;">Contoh Storytelling &amp; Teater Mini</div>
+        <div style="font-size:.9rem;opacity:.8;margin-top:6px;">Demonstrasi Siswa — 9:30</div>
+      </div>
+    </div>
+
+    <h3>🎤 Pilihan Bentuk Presentasi</h3>
+    <div class="accordion">
+      <div class="accordion-header">🎙️ Monolog (Storytelling) <span class="arrow">▼</span></div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <p>Satu orang membawakan seluruh cerita dengan suara, ekspresi, dan gestur.</p>
+        <ul style="padding-left:20px;margin-top:8px;">
+          <li>Durasi: 5–7 menit</li>
+          <li>Perlu latihan intonasi, jeda, dan mimik</li>
+          <li>Boleh pakai properti sederhana</li>
+        </ul>
+      </div></div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">🎭 Teater Mini (Dialog) <span class="arrow">▼</span></div>
+      <div class="accordion-body"><div class="accordion-body-inner">
+        <p>Dua atau lebih siswa memerankan tokoh.</p>
+        <ul style="padding-left:20px;margin-top:8px;">
+          <li>Durasi: 7–10 menit</li>
+          <li>Perlu blocking, kostum sederhana</li>
+          <li>Latihan bersama kelompok</li>
+        </ul>
+      </div></div>
+    </div>
+
+    <h3>📋 Rubrik Penilaian Presentasi</h3>
+    <table class="compare-table">
+      <tr><th>Aspek</th><th>Skor Maks</th><th>Indikator</th></tr>
+      <tr><td>Penguasaan naskah</td><td>25</td><td>Hafal, lancar, tidak membaca terus.</td></tr>
+      <tr><td>Ekspresi &amp; intonasi</td><td>25</td><td>Vokal jelas, mimik sesuai suasana.</td></tr>
+      <tr><td>Gestur &amp; blocking</td><td>20</td><td>Gerakan mendukung cerita.</td></tr>
+      <tr><td>Penyampaian nilai luhur</td><td>20</td><td>Nilai hikayat tersampaikan.</td></tr>
+      <tr><td>Kerja sama (jika kelompok)</td><td>10</td><td>Kompak, saling mendukung.</td></tr>
+    </table>
+
+    <h3>💭 Refleksi Nilai Luhur</h3>
+    <div class="reflection">
+      <p style="margin-bottom:8px;"><em>Nilai luhur apa yang kamu rasakan setelah memerankan/mendengarkan cerita adaptasi hikayat ini?</em></p>
+      <textarea id="reflectionText" placeholder="Tulis refleksimu di sini..."></textarea>
+      <div class="quiz-actions">
+        <button class="btn btn-gold" onclick="saveReflection()">💾 Simpan Refleksi</button>
+      </div>
+      <div class="quiz-result" id="reflectionResult"></div>
+    </div>
+
+    <div class="quiz" data-quiz="tp4">
+      <h3>🎯 Kuis Interaktif — Pertemuan 4</h3>
+      <form>
+        <div class="question" data-correct="a">
+          <p>1. Bentuk presentasi cerpen adaptasi dengan satu orang pembaca cerita disebut...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="t4q1" value="a"><span class="letter">A</span>Monolog / storytelling</label>
+            <label class="option"><input type="radio" name="t4q1" value="b"><span class="letter">B</span>Teater mini</label>
+            <label class="option"><input type="radio" name="t4q1" value="c"><span class="letter">C</span>Diskusi panel</label>
+            <label class="option"><input type="radio" name="t4q1" value="d"><span class="letter">D</span>Debat</label>
+          </div>
+        </div>
+        <div class="question" data-correct="b">
+          <p>2. Aspek penting dalam presentasi monolog adalah...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="t4q2" value="a"><span class="letter">A</span>Menghafal naskah saja</label>
+            <label class="option"><input type="radio" name="t4q2" value="b"><span class="letter">B</span>Intonasi, jeda, mimik, dan gestur</label>
+            <label class="option"><input type="radio" name="t4q2" value="c"><span class="letter">C</span>Membaca cepat</label>
+            <label class="option"><input type="radio" name="t4q2" value="d"><span class="letter">D</span>Berbicara pelan</label>
+          </div>
+        </div>
+        <div class="question" data-correct="c">
+          <p>3. Refleksi nilai luhur dalam presentasi hikayat bertujuan untuk...</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="t4q3" value="a"><span class="letter">A</span>Mengisi waktu</label>
+            <label class="option"><input type="radio" name="t4q3" value="b"><span class="letter">B</span>Mendapat nilai tambahan</label>
+            <label class="option"><input type="radio" name="t4q3" value="c"><span class="letter">C</span>Menghayati dan menerapkan nilai dalam kehidupan</label>
+            <label class="option"><input type="radio" name="t4q3" value="d"><span class="letter">D</span>Mengulang cerita</label>
+          </div>
+        </div>
+      </form>
+      <div class="quiz-actions">
+        <button class="btn btn-primary" onclick="checkQuiz('tp4')">✅ Periksa Jawaban</button>
+        <button class="btn btn-outline" onclick="resetQuiz('tp4')">🔄 Ulangi</button>
+      </div>
+      <div class="quiz-result" id="result-tp4"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= MODAL INFO ================= -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="emoji" id="modalEmoji">🎉</div>
+    <h2 id="modalTitle">Selamat!</h2>
+    <p id="modalText">Kamu telah menyelesaikan kuis ini.</p>
+    <button class="btn btn-primary" onclick="closeModal()">Tutup</button>
+  </div>
+</div>
+
+<!-- ================= TEACHER LOGIN MODAL ================= -->
+<div class="modal-overlay" id="teacherLoginModal">
+  <div class="modal">
+    <div class="emoji">🔐</div>
+    <h2>Akses Guru</h2>
+    <p>Masukkan password untuk membuka dashboard.</p>
+    <input type="password" id="teacherPassInput" placeholder="Password" autocomplete="off">
+    <button class="btn btn-primary" onclick="verifyTeacher()" style="width:100%;justify-content:center;">🔓 Masuk Dashboard</button>
+    <p style="margin-top:12px;font-size:.8rem;color:#999;">Default password: <code>guru2025</code></p>
+  </div>
+</div>
+
+<!-- ================= TEACHER DASHBOARD ================= -->
+<div class="dashboard" id="teacherDashboard">
+  <div class="dash-header">
+    <div class="dash-header-inner">
+      <div class="dash-title">
+        <span class="icon">📊</span>
+        <div>
+          <div>Dashboard Guru</div>
+          <div style="font-size:.8rem;opacity:.8;font-weight:400;">Monitoring Nilai &amp; Aktivitas Siswa</div>
+        </div>
+      </div>
+      <div class="dash-actions">
+        <button class="dash-btn" onclick="exportCSV()">📥 Export CSV</button>
+        <button class="dash-btn" onclick="refreshDashboard()">🔄 Refresh</button>
+        <button class="dash-btn close" onclick="closeDashboard()">✕ Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-body">
+    <!-- STATS -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-label">Total Siswa</div>
+        <div class="stat-value" id="statTotalStudents">0</div>
+        <div class="stat-sub">Terdaftar dalam sistem</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-icon">📈</div>
+        <div class="stat-label">Rata-rata Nilai</div>
+        <div class="stat-value" id="statAvg">0</div>
+        <div class="stat-sub">Dari seluruh kuis</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-label">Nilai Tertinggi</div>
+        <div class="stat-value" id="statMax">0</div>
+        <div class="stat-sub">Skor terbaik</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">Tuntas (≥70)</div>
+        <div class="stat-value" id="statPassed">0</div>
+        <div class="stat-sub">Siswa yang lulus</div>
+      </div>
+    </div>
+
+    <!-- CHART -->
+    <div class="students-panel">
+      <div class="panel-title">
+        <span>📊 Distribusi Nilai Rata-rata Siswa</span>
+      </div>
+      <div id="chartWrapper">
+        <div class="chart-bars-wrapper">
+          <div class="chart-container" id="chartContainer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDENT TABLE -->
+    <div class="students-panel">
+      <div class="panel-title">
+        <span>👥 Daftar Nilai Siswa</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Cari nama siswa..." oninput="renderStudentTable()">
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="student-table" id="studentTable">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Siswa</th>
+              <th>Kelas</th>
+              <th>TP 1</th>
+              <th>TP 2</th>
+              <th>TP 3</th>
+              <th>TP 4</th>
+              <th>Rata-rata</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody"></tbody>
+        </table>
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <div class="emoji">📭</div>
+          <div>Belum ada data siswa. Siswa perlu login dan mengerjakan kuis terlebih dahulu.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= STUDENT DETAIL MODAL ================= -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal" style="max-width:650px;text-align:left;">
+    <h2 id="detailName" style="color:var(--primary);">Detail Siswa</h2>
+    <div id="detailContent"></div>
+    <button class="btn btn-primary" onclick="closeDetailModal()" style="width:100%;justify-content:center;margin-top:20px;">Tutup</button>
+  </div>
+</div>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <p>© 2025 — Media Pembelajaran Interaktif Bahasa Indonesia | Teks Hikayat Kelas XI SMK</p>
+  <p style="margin-top:6px;">Total 14 JP • A-11 s.d. A-14</p>
+</footer>
+
+<script>
+/* ============================================================
+   KONFIGURASI
+   ============================================================ */
+const TEACHER_PASSWORD = 'guru2025'; // Ganti sesuai kebutuhan
+const STORAGE_KEY = 'hikayatSiswaData';
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentStudent = null;
+let quizStates = {tp1:false,tp2:false,tp3:false,tp4:false};
+let studentData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+/* ============================================================
+   LOGIN SISWA
+   ============================================================ */
+function loginStudent(){
+  const name = document.getElementById('studentNameInput').value.trim();
+  const kelas = document.getElementById('studentClassInput').value.trim();
+  if(name.length < 3){ alert('Nama minimal 3 karakter, ya!'); return; }
+  if(kelas.length < 2){ alert('Mohon isi kelasmu!'); return; }
+
+  currentStudent = {name, kelas};
+
+  // Buat/ambil data siswa
+  if(!studentData[name]){
+    studentData[name] = {
+      name: name,
+      kelas: kelas,
+      tp1: null, tp2: null, tp3: null, tp4: null,
+      cerpen: '',
+      refleksi: '',
+      lastUpdate: new Date().toISOString()
+    };
+  } else {
+    studentData[name].kelas = kelas;
+    // Restore progress
+    ['tp1','tp2','tp3','tp4'].forEach(tp=>{
+      if(studentData[name][tp] !== null && studentData[name][tp] !== undefined){
+        quizStates[tp] = true;
+        // Tampilkan hasil sebelumnya
+        const score = studentData[name][tp];
+        const resultEl = document.getElementById(`result-${tp}`);
+        resultEl.className = 'quiz-result show pass';
+        resultEl.innerHTML = `💾 Nilai tersimpan: <strong>${score}</strong> dari pertemuan sebelumnya.`;
+      }
+    });
+    // Restore cerpen & refleksi
+    document.getElementById('cerpenText').value = studentData[name].cerpen || '';
+    document.getElementById('reflectionText').value = studentData[name].refleksi || '';
+  }
+
+  saveData();
+  document.getElementById('studentBadge').style.display = 'flex';
+  document.getElementById('badgeName').textContent = name;
+  document.getElementById('loginModal').classList.remove('show');
+  updateTpButtons();
+  updateProgress();
+  showModal('🎉','Selamat Belajar, ' + name + '!','Kamu bisa memulai dari Pertemuan 1. Jangan lupa kerjakan kuisnya, ya!');
+}
+
+function saveData(){
+  studentData[currentStudent.name].lastUpdate = new Date().toISOString();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(studentData));
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+document.querySelectorAll('.tp-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const target = btn.dataset.target;
+    document.querySelectorAll('.tp-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(target).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ============================================================
+   ACCORDION
+   ============================================================ */
+document.querySelectorAll('.accordion-header').forEach(h=>{
+  h.addEventListener('click',()=>h.parentElement.classList.toggle('open'));
+});
+
+/* ============================================================
+   OPTION SELECTION
+   ============================================================ */
+document.querySelectorAll('.option').forEach(opt=>{
+  opt.addEventListener('click',()=>{
+    const name = opt.querySelector('input').name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(inp=>{
+      inp.closest('.option').classList.remove('selected');
+    });
+    opt.querySelector('input').checked = true;
+    opt.classList.add('selected');
+  });
+});
+
+/* ============================================================
+   QUIZ LOGIC + PENYIMPANAN NILAI
+   ============================================================ */
+function checkQuiz(tp){
+  if(!currentStudent){ alert('Silakan login terlebih dahulu!'); return; }
+
+  const quizEl = document.querySelector(`[data-quiz="${tp}"]`);
+  const questions = quizEl.querySelectorAll('.question');
+  let correct = 0;
+
+  questions.forEach(q=>{
+    const correctAns = q.dataset.correct;
+    const selected = q.querySelector('input:checked');
+    q.querySelectorAll('.option').forEach(o=>o.classList.remove('correct','wrong'));
+    q.querySelectorAll('.option').forEach(o=>{
+      const val = o.querySelector('input').value;
+      if(val === correctAns) o.classList.add('correct');
+      else if(selected && selected.value === val) o.classList.add('wrong');
+    });
+    if(selected && selected.value === correctAns) correct++;
+  });
+
+  const total = questions.length;
+  const score = Math.round((correct/total)*100);
+  const resultEl = document.getElementById(`result-${tp}`);
+
+  // Simpan nilai HANYA jika lebih tinggi dari sebelumnya (best score)
+  const prev = studentData[currentStudent.name][tp];
+  if(prev === null || prev === undefined || score > prev){
+    studentData[currentStudent.name][tp] = score;
+    saveData();
+  }
+
+  if(score >= 70){
+    resultEl.className = 'quiz-result show pass';
+    resultEl.innerHTML = `🎉 Hebat! Skor kamu: <strong>${score}</strong> (${correct}/${total} benar)<br><small>Nilai tersimpan otomatis di dashboard guru.</small>`;
+    quizStates[tp] = true;
+    updateTpButtons();
+    updateProgress();
+    showModal('🎉','Selamat!',`Skor kamu ${score}. Nilai telah tersimpan!`);
+  } else {
+    resultEl.className = 'quiz-result show fail';
+    resultEl.innerHTML = `😅 Skor kamu: <strong>${score}</strong> (${correct}/${total} benar)<br><small>Coba baca ulang materinya, ya!</small>`;
+  }
+}
+
+function resetQuiz(tp){
+  const quizEl = document.querySelector(`[data-quiz="${tp}"]`);
+  quizEl.querySelectorAll('input').forEach(i=>i.checked=false);
+  quizEl.querySelectorAll('.option').forEach(o=>o.classList.remove('selected','correct','wrong'));
+  const resultEl = document.getElementById(`result-${tp}`);
+  resultEl.className = 'quiz-result';
+  resultEl.innerHTML = '';
+}
+
+function updateTpButtons(){
+  if(!currentStudent) return;
+  ['tp1','tp2','tp3','tp4'].forEach(tp=>{
+    const btn = document.querySelector(`.tp-btn[data-target="${tp}"]`);
+    if(studentData[currentStudent.name][tp] !== null && studentData[currentStudent.name][tp] !== undefined){
+      btn.classList.add('completed');
+    } else {
+      btn.classList.remove('completed');
+    }
+  });
+}
+
+function updateProgress(){
+  if(!currentStudent) return;
+  const total = 4;
+  const done = ['tp1','tp2','tp3','tp4'].filter(tp=>{
+    const v = studentData[currentStudent.name][tp];
+    return v !== null && v !== undefined;
+  }).length;
+  const percent = Math.round((done/total)*100);
+  // tidak ada progress bar di header baru, tapi tetap dihitung
+}
+
+/* ============================================================
+   SIMPAN CERPEN & REFLEKSI
+   ============================================================ */
+function saveCerpen(){
+  if(!currentStudent){ alert('Login dulu!'); return; }
+  const text = document.getElementById('cerpenText').value.trim();
+  const res = document.getElementById('cerpenResult');
+  if(text.length < 100){
+    res.className = 'quiz-result show fail';
+    res.innerHTML = '⚠️ Cerpen minimal 100 karakter (idealnya 500 kata).';
+    return;
+  }
+  studentData[currentStudent.name].cerpen = text;
+  saveData();
+  res.className = 'quiz-result show pass';
+  res.innerHTML = '✅ Cerpen berhasil disimpan! Guru dapat melihatnya di dashboard.';
+}
+
+function saveReflection(){
+  if(!currentStudent){ alert('Login dulu!'); return; }
+  const text = document.getElementById('reflectionText').value.trim();
+  const res = document.getElementById('reflectionResult');
+  if(text.length < 20){
+    res.className = 'quiz-result show fail';
+    res.innerHTML = '⚠️ Tuliskan refleksimu minimal 20 karakter.';
+    return;
+  }
+  studentData[currentStudent.name].refleksi = text;
+  saveData();
+  res.className = 'quiz-result show pass';
+  res.innerHTML = '✅ Refleksi berhasil disimpan!';
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+function showModal(emoji,title,text){
+  document.getElementById('modalEmoji').textContent = emoji;
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalText').textContent = text;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+document.getElementById('modal').addEventListener('click',(e)=>{ if(e.target.id === 'modal') closeModal(); });
+
+/* ============================================================
+   TEACHER DASHBOARD
+   ============================================================ */
+function openTeacherLogin(){
+  document.getElementById('teacherLoginModal').classList.add('show');
+  document.getElementById('teacherPassInput').value = '';
+  setTimeout(()=>document.getElementById('teacherPassInput').focus(), 100);
+}
+
+function verifyTeacher(){
+  const pass = document.getElementById('teacherPassInput').value;
+  if(pass === TEACHER_PASSWORD){
+    document.getElementById('teacherLoginModal').classList.remove('show');
+    openDashboard();
+  } else {
+    alert('❌ Password salah!');
+  }
+}
+
+function openDashboard(){
+  studentData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  document.getElementById('teacherDashboard').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  refreshDashboard();
+}
+
+function closeDashboard(){
+  document.getElementById('teacherDashboard').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function refreshDashboard(){
+  renderStats();
+  renderChart();
+  renderStudentTable();
+}
+
+/* ============================================================
+   RENDER STATISTIK
+   ============================================================ */
+function renderStats(){
+  const students = Object.values(studentData);
+  const totalStudents = students.length;
+  let allScores = [];
+  let passedCount = 0;
+
+  students.forEach(s=>{
+    const scores = ['tp1','tp2','tp3','tp4']
+      .map(tp => s[tp])
+      .filter(v => v !== null && v !== undefined);
+    allScores.push(...scores);
+    const avg = scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : 0;
+    if(avg >= 70 && scores.length === 4) passedCount++;
+  });
+
+  const avg = allScores.length ? Math.round(allScores.reduce((a,b)=>a+b,0)/allScores.length) : 0;
+  const max = allScores.length ? Math.max(...allScores) : 0;
+
+  document.getElementById('statTotalStudents').textContent = totalStudents;
+  document.getElementById('statAvg').textContent = avg;
+  document.getElementById('statMax').textContent = max;
+  document.getElementById('statPassed').textContent = passedCount;
+}
+
+/* ============================================================
+   RENDER CHART
+   ============================================================ */
+function renderChart(){
+  const container = document.getElementById('chartContainer');
+  const students = Object.values(studentData);
+
+  if(students.length === 0){
+    container.innerHTML = '<div style="width:100%;text-align:center;color:#999;padding:60px 0;">Belum ada data untuk ditampilkan.</div>';
+    return;
+  }
+
+  // Hitung rata-rata per siswa
+  const data = students.map(s=>{
+    const scores = ['tp1','tp2','tp3','tp4']
+      .map(tp=>s[tp])
+      .filter(v=>v !== null && v !== undefined);
+    const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
+    return { name: s.name.split(' ')[0], fullName: s.name, avg };
+  }).sort((a,b)=>b.avg - a.avg).slice(0, 10); // top 10
+
+  container.innerHTML = '';
+  data.forEach(d=>{
+    const bar = document.createElement('div');
+    bar.className = 'chart-bar';
+    bar.style.height = Math.max(d.avg, 4) + '%';
+    bar.title = `${d.fullName}: ${d.avg}`;
+    bar.innerHTML = `
+      <span class="bar-value">${d.avg}</span>
+      <span class="bar-label">${d.name}</span>
+    `;
+    bar.onclick = ()=> showStudentDetail(d.fullName);
+    container.appendChild(bar);
+  });
+}
+
+/* ============================================================
+   RENDER TABLE
+   ============================================================ */
+function renderStudentTable(){
+  const tbody = document.getElementById('studentTableBody');
+  const emptyState = document.getElementById('emptyState');
+  const search = (document.getElementById('searchInput').value || '').toLowerCase();
+  const students = Object.values(studentData);
+
+  if(students.length === 0){
+    tbody.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  const filtered = students
+    .filter(s => s.name.toLowerCase().includes(search) || s.kelas.toLowerCase().includes(search))
+    .sort((a,b)=> a.name.localeCompare(b.name));
+
+  tbody.innerHTML = '';
+  filtered.forEach((s, i)=>{
+    const scores = ['tp1','tp2','tp3','tp4'].map(tp => s[tp]);
+    const validScores = scores.filter(v => v !== null && v !== undefined);
+    const avg = validScores.length ? Math.round(validScores.reduce((a,b)=>a+b,0)/validScores.length) : 0;
+    const isPassed = avg >= 70 && validScores.length === 4;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${i+1}</td>
+      <td><strong>${escapeHtml(s.name)}</strong></td>
+      <td>${escapeHtml(s.kelas || '-')}</td>
+      ${scores.map(sc => `<td>${renderScoreChip(sc)}</td>`).join('')}
+      <td><strong>${avg}</strong></td>
+      <td>${isPassed ? '<span class="score-chip excellent">✅ Tuntas</span>' : '<span class="score-chip fair">⏳ Proses</span>'}</td>
+      <td>
+        <button class="action-btn view" onclick="showStudentDetail('${escapeJs(s.name)}')">👁️ Detail</button>
+        <button class="action-btn del" onclick="deleteStudent('${escapeJs(s.name)}')">🗑️</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function renderScoreChip(score){
+  if(score === null || score === undefined){
+    return '<span class="score-chip empty">-</span>';
+  }
+  let cls = 'poor';
+  if(score >= 85) cls = 'excellent';
+  else if(score >= 70) cls = 'good';
+  else if(score >= 50) cls = 'fair';
+  return `<span class="score-chip ${cls}">${score}</span>`;
+}
+
+/* ============================================================
+   DETAIL SISWA
+   ============================================================ */
+function showStudentDetail(name){
+  const s = studentData[name];
+  if(!s) return;
+
+  const scores = ['tp1','tp2','tp3','tp4'].map(tp => s[tp]);
+  const validScores = scores.filter(v => v !== null && v !== undefined);
+  const avg = validScores.length ? Math.round(validScores.reduce((a,b)=>a+b,0)/validScores.length) : 0;
+
+  document.getElementById('detailName').textContent = '👤 ' + s.name;
+
+  const rows = [
+    ['Kelas', s.kelas || '-'],
+    ['TP 1 (Nilai Moral & Unsur)', s.tp1 !== null && s.tp1 !== undefined ? s.tp1 : 'Belum dikerjakan'],
+    ['TP 2 (Interpretasi & Perbandingan)', s.tp2 !== null && s.tp2 !== undefined ? s.tp2 : 'Belum dikerjakan'],
+    ['TP 3 (Menulis Cerpen)', s.tp3 !== null && s.tp3 !== undefined ? s.tp3 : 'Belum dikerjakan'],
+    ['TP 4 (Presentasi)', s.tp4 !== null && s.tp4 !== undefined ? s.tp4 : 'Belum dikerjakan'],
+    ['Rata-rata', avg],
+    ['Terakhir Update', s.lastUpdate ? new Date(s.lastUpdate).toLocaleString('id-ID') : '-']
+  ];
+
+  let html = rows.map(r=>`
+    <div class="detail-row">
+      <span class="label">${r[0]}</span>
+      <span class="value">${r[1]}</span>
+    </div>
+  `).join('');
+
+  if(s.cerpen){
+    html += `<h3 style="color:var(--primary);margin-top:20px;font-size:1rem;">📝 Cerpen Adaptasi:</h3>
+      <div class="reflection-box">${escapeHtml(s.cerpen)}</div>`;
+  }
+  if(s.refleksi){
+    html += `<h3 style="color:var(--primary);margin-top:16px;font-size:1rem;">💭 Refleksi Nilai Luhur:</h3>
+      <div class="reflection-box">${escapeHtml(s.refleksi)}</div>`;
+  }
+
+  document.getElementById('detailContent').innerHTML = html;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+function closeDetailModal(){
+  document.getElementById('detailModal').classList.remove('show');
+}
+
+/* ============================================================
+   HAPUS SISWA
+   ============================================================ */
+function deleteStudent(name){
+  if(!confirm(`Yakin ingin menghapus data "${name}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+  delete studentData[name];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(studentData));
+  refreshDashboard();
+}
+
+/* ============================================================
+   EXPORT CSV
+   ============================================================ */
+function exportCSV(){
+  const students = Object.values(studentData);
+  if(students.length === 0){ alert('Belum ada data untuk diexport.'); return; }
+
+  let csv = 'Nama,Kelas,TP1,TP2,TP3,TP4,Rata-rata,Status\n';
+  students.forEach(s=>{
+    const scores = ['tp1','tp2','tp3','tp4'].map(tp => s[tp] !== null && s[tp] !== undefined ? s[tp] : '');
+    const validScores = scores.filter(v => v !== '').map(Number);
+    const avg = validScores.length ? Math.round(validScores.reduce((a,b)=>a+b,0)/validScores.length) : 0;
+    const status = (avg >= 70 && validScores.length === 4) ? 'Tuntas' : 'Proses';
+    csv += `"${s.name}","${s.kelas||''}",${scores[0]},${scores[1]},${scores[2]},${scores[3]},${avg},${status}\n`;
+  });
+
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `nilai-hikayat-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+function escapeJs(str){
+  return String(str).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+window.addEventListener('load',()=>{
+  // Enter key di login siswa
+  document.getElementById('studentClassInput').addEventListener('keypress', e=>{
+    if(e.key === 'Enter') loginStudent();
+  });
+  // Enter key di login guru
+  document.getElementById('teacherPassInput').addEventListener('keypress', e=>{
+    if(e.key === 'Enter') verifyTeacher();
+  });
+});
+</script>
+</body>
+    </html>
